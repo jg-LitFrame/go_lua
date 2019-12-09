@@ -1,0 +1,76 @@
+chunk ::= block;
+block ::= {stat} [retstat];
+retstat ::= return [explist] [';'];
+explist ::= exp {',' exp};
+
+stat :: = ';'
+    | varlist '=' explist
+    | functioncall
+    | label
+    | break
+    | goto Name
+    | do block end
+    | while exp do block end
+    | repeat exp until end
+    | if exp then block {elseif exp then block} [else block] end;
+    | for NmaeList in explist do block end;
+    | function funcname funcbody
+    | local function funcname funcbody
+    | local namelist ['=' explist]
+;
+
+(*while and repeat*)
+while exp do block end;
+repeat block until exp;
+
+if exp then block {elseif exp then block} [else block] end;
+(* else 可以看成 elseif true,从而简化结构 *)
+if exp then block {elseif exp then block} end;
+
+(* for语句 *)
+for Name '=' exp, exp [',' exp] do block end;
+for NmaeList in explist do block end;
+NmaeList := Name {',' Name};
+
+(* 局部声明 *)
+local namelist ['=' explist];
+namelist ::= Name {',' Name};
+
+(* 赋值语句 *)
+varlist '=' explist;
+varlist ::= Var {',' Var};
+Var ::= Name | prefixexp '[' exp ']' | prefixexp '.' Name;
+
+(* 非局部/局部函数定义 *)
+local function funcname funcbody;
+function funcname funcbody;
+funcname ::= Name {'.' Name} [':' Name];
+funcbody ::= '(' [parlist] ')' block end;
+parlist ::= namelist [',' '...'] | '...';
+namelist ::= Name {',' Name};
+
+
+(*==================== Exp ==================*)
+exp ::= nil | false | true | Numeral | LiteralString | '...' |
+    functiondef | prefixexp | tableconstructor | exp binop exp | unop exp;
+
+(* table 构造 *)
+tableconstructor ::= '{' [fieldlist] '}';
+fieldlist ::= field {fieldseq field} [fieldseq];
+field ::= '[' exp ']' '=' exp | Name '=' exp | exp;
+fieldseq ::= ',' | ';';
+
+(* Funcation 定义 *)
+functiondef ::= funcation funcbody;
+funcbody ::= '(' [parlist] ')' block end;
+parlist ::= namelist [',' '...'] | '...';
+namelist ::= Name {',' Name};
+
+(* 前缀表达式 *)
+prefixexp ::= var | functioncall | '(' exp ')';
+var ::= Name | prefixexp '[' exp ']' | prefixexp '.' Name;
+functioncall::= prefixexp args | prefixexp ':' Name args;
+
+(* 函数调用表达式 *)
+functioncall ::= prefixexp [':' Name] args;
+args ::= '(' [explist] ')' | tableconstructor | LiteralString;
