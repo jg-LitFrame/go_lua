@@ -3,12 +3,25 @@ package main
 import (
 	"fmt"
 	"go/compiler/lexer"
+	"go/compiler/parser"
 	"io/ioutil"
+	"encoding/json"
 )
 
 func main() {
 
-	testPrintLexer()
+	//testPrintLexer()
+	testParse()
+}
+
+func testParse() {
+	chunk, chunkName := "", ""
+	astLua := parser.Parse(chunk, chunkName)
+	b, err := json.Marshal(astLua)
+	if err != nil {
+		panic(err)
+	}
+	println(string(b))
 }
 
 func testPrintLexer() {
@@ -30,7 +43,7 @@ func testLexer(chunk, chunkName string) {
 			break
 		}
 	}
-	
+
 }
 
 func kindToCategory(kind int) string {

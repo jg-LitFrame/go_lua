@@ -36,7 +36,7 @@ type ForNumStat struct {
 	VarName   string
 	InitExp   Exp
 	LimitExp  Exp
-	SepExp    Exp
+	StepExp    Exp
 	Block     *Block
 }
 
@@ -47,7 +47,7 @@ type ForInStat struct {
 	Block    *Block
 }
 
-type LocalVarDecStat struct {
+type LocalVarDeclStat struct {
 	LastLine int
 	NameList []string
 	ExpList  []Exp

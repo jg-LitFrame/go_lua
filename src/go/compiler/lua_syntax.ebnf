@@ -74,3 +74,20 @@ functioncall::= prefixexp args | prefixexp ':' Name args;
 (* 函数调用表达式 *)
 functioncall ::= prefixexp [':' Name] args;
 args ::= '(' [explist] ')' | tableconstructor | LiteralString;
+
+
+(*优先级定义*)
+exp ::= exp12;
+exp12 ::= exp10 {or exp11};
+exp11 ::= exp10 {and exp10};
+exp10 ::= exp9{('<' | '>' | '<=' | '>=' | '~=' | '==') exp9};
+exp9 ::= exp8 {'|' exp8};
+exp8 ::= exp7 {'~' exp7};
+exp7 ::= exp6 {'&' exp6};
+exp6 ::= exp5 {('<<'|'>>') exp5};
+exp5 ::= exp4 {'..' exp4};
+exp4 ::= exp3 {('+'|'-') exp3};
+exp3 ::= exp2 {(|'*'|'/'|'//'|'%') exp2};
+exp2 ::= {{'not' | '#' |  '-' | '~'}} exp1;
+exp1 ::= exp0 {'^' exp2};
+exp0 ::= nil | false | true | Numeral | LiteraString | '...' | 'functiondef' | 'prefixExp' | tableconstructor;

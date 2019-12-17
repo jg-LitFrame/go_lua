@@ -20,4 +20,5 @@ ql/test/**/go.sum
 tools/bin
 tools/tokenizer.jar
 
-.vscode/
+*.exe
+

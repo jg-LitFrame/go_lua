@@ -4,14 +4,18 @@ type Exp interface{}
 
 type NilExp struct{ Line int }
 type TrueExp struct{ Line int }
-type False struct{ Line int }
+type FalseExp struct{ Line int }
 type VarargExp struct{ Line int }
-type IntegerExp struct{ Line int }
+type IntegerExp struct
+{ 
+	Line int
+	Val int64
+}
 type FloatExp struct {
 	Line int
-	Val  int64
+	Val  float64
 }
-type String struct {
+type StringExp struct {
 	Line int
 	Val  string
 }
@@ -53,7 +57,7 @@ type FuncDefExp struct {
 	Block    *Block
 }
 
-type ParentsExp struct {
+type ParensExp struct {
 	Exp Exp
 }
 
