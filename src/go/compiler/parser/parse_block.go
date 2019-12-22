@@ -26,7 +26,7 @@ func parseStats(lexer *lexer.Lexer) []ast.Stat {
 	stats := make([]ast.Stat, 0, 8)
 	for !_isReturnOrBlockEnd(lexer.LookAhead()) {
 		stat := parseStat(lexer)
-		if _, ok := stat.(*ast.EmptyStat); ok {
+		if _, ok := stat.(*ast.EmptyStat); !ok {
 			stats = append(stats, stat)
 		}
 	}
@@ -90,13 +90,12 @@ func parseStat(le *lexer.Lexer) ast.Stat {
 		return parseIfStat(le)
 	case lexer.TOKEN_KW_FOR:
 		return parseForStat(le)
-	//case lexer.TOKEN_KW_FUNCTION:
-	//	return parseFuncDefStat(le)
-	//case lexer.TOKEN_KW_LOCAL:
-	//	return parseLocalStat(le)
+	case lexer.TOKEN_KW_FUNCTION:
+		return parseFuncDefStat(le)
+	case lexer.TOKEN_KW_LOCAL:
+		return parseLocalAssignOrFuncDefStat(le)
 	default:
-		//return parseAssignOrFuncCallStat(le)
-		return nil
+		return parseAssignOrCallStat(le)
 	}
 }
 
@@ -106,6 +105,7 @@ func parseEmptyStat(le *lexer.Lexer) *ast.EmptyStat {
 }
 
 func parseBreakStat(le *lexer.Lexer) *ast.BreakStat {
+	le.NextTokenOfKind(lexer.TOKEN_KW_BREAK)
 	return &ast.BreakStat{le.Line()}
 }
 
@@ -330,6 +330,10 @@ func _parseFuncName(le *lexer.Lexer) (exp ast.Exp, hasColon bool) {
 }
 
 //========================================================= Exp ===============================================
+func parseExp(le *lexer.Lexer) ast.Exp {
+	return parseExp12(le)
+}
+
 func parseExp12(le *lexer.Lexer) ast.Exp {
 	exp := parseExp11(le)
 	for le.LookAhead() == lexer.TOKEN_OP_OR {
@@ -475,11 +479,19 @@ func parseExp0(le *lexer.Lexer) ast.Exp {
 	case lexer.TOKEN_KW_FALSE:
 		line, _, _ := le.NextToken()
 		return &ast.FalseExp{line}
+	case lexer.TOKEN_KW_TRUE:
+		line, _, _ := le.NextToken()
+		return &ast.TrueExp{line}
 	case lexer.TOKEN_STRING:
 		line, _, str := le.NextToken()
 		return &ast.StringExp{line, str}
 	case lexer.TOKEN_NUMBER:
 		return parseNumberExp(le)
+	case lexer.TOKEN_SEP_LCURLY:
+		return parseTableConstructorExp(le)
+	case lexer.TOKEN_KW_FUNCTION:
+		le.NextToken()
+		return parseFuncDefExp(le)
 	default:
 		return parsePrefixExp(le)
 	}
@@ -496,9 +508,7 @@ func parseNumberExp(le *lexer.Lexer) ast.Exp {
 	}
 }
 
-func parseExp(le *lexer.Lexer) ast.Exp {
-	return &ast.NilExp{0}
-}
+
 
 func parseFuncDefExp(le *lexer.Lexer) *ast.FuncDefExp {
 	line := le.Line()
@@ -597,7 +607,8 @@ func parsePrefixExp(le *lexer.Lexer) ast.Exp {
 
 func _finishPrefixExp(le *lexer.Lexer, exp ast.Exp) ast.Exp {
 	for {
-		switch le.LookAhead() {
+		tokenType := le.LookAhead()
+		switch tokenType {
 		case lexer.TOKEN_SEP_LBRACK:
 			le.NextToken()
 			keyExp := parseExp(le)

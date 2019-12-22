@@ -409,7 +409,7 @@ func (lexer *Lexer) LookAhead() int {
 	lexer.nextTokenLine = line
 	lexer.nextTokenKind = kind
 	lexer.nextToken = token
-	return line
+	return kind
 }
 
 func (lexer *Lexer) Line() int {

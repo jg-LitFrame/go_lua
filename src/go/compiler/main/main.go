@@ -15,7 +15,12 @@ func main() {
 }
 
 func testParse() {
-	chunk, chunkName := "", ""
+	luabytePath := "D:/work_space/go_lua/src/lua/ch16/test.lua"
+	data, err := ioutil.ReadFile(luabytePath)
+	if err != nil {
+		panic(err)
+	}
+	chunk, chunkName := string(data), "test"
 	astLua := parser.Parse(chunk, chunkName)
 	b, err := json.Marshal(astLua)
 	if err != nil {
